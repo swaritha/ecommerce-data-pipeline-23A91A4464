@@ -1,0 +1,43 @@
+database:
+  host: localhost
+  port: 5432
+  name: ecommercedb
+  user: admin
+  password: password
+
+data_generation:
+  customers:
+    count: 1000
+  products:
+    count: 500
+  transactions:
+    count: 10000
+  transaction_items:
+    min_per_transaction: 1
+    max_per_transaction: 5
+  date_range:
+    start: "2024-01-01"
+    end: "2024-12-31"
+
+pipeline:
+  batch_size: 1000
+  log_level: INFO
+  retry_attempts: 3
+  timeout_seconds: 300
+  bi_tool: tableau
+
+scheduler:
+  daily_time: "02:00"          # Daily pipeline execution (Step 5.2 - 1.5pts)
+  cleanup_time: "03:00"        # Daily cleanup execution
+
+retention:
+  days: 7                      # Data retention policy (Step 5.2 - 1pt)
+
+monitoring:
+  execution_threshold_hours: 25  # Alert if no run in 25hrs (Step 5.3 - 1pt)
+  data_freshness_lag_hours: 24   # Max allowed lag between layers
+  volume_anomaly_std_dev: 3      # 3-sigma anomaly detection
+  quality_score_threshold: 95    # Warning if quality < 95%
+
+docker:
+  postgres_version: 14

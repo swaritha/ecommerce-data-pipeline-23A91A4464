@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: ecommerce-postgres
+    environment:
+      POSTGRES_DB: ecommercedb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../sql/ddl:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pipeline_network
+
+  pipeline:
+    build: 
+      context: ..
+      dockerfile: Dockerfile
+    container_name: ecommerce-pipeline
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=ecommercedb
+      - DB_USER=admin
+      - DB_PASSWORD=password
+    volumes:
+      - ../data:/app/data
+      - ../logs:/app/logs
+      - ../config:/app/config
+    working_dir: /app
+    networks:
+      - pipeline_network
+
+volumes:
+  postgres_data:
+
+networks:
+  pipeline_network:
+    driver: bridge

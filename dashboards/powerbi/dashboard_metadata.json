@@ -1,0 +1,9 @@
+{
+  "bi_tool": "powerbi",
+  "dashboard_name": "E-Commerce Analytics Dashboard",
+  "public_url": "N/A",
+  "pages": 4,
+  "visualizations": 16,
+  "data_source": "10 CSV files from data/processed/analytics",
+  "created_date": "2025-12-26"
+}

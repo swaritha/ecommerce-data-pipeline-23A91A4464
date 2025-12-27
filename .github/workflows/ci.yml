@@ -1,0 +1,72 @@
+name: E-Commerce Pipeline CI/CD
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_DB: ecommercedb
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt pytest-cov
+    
+    - name: Lint code
+      run: |
+        pip install flake8
+        flake8 scripts/
+    
+    - name: Create schemas
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: ecommercedb
+        DB_USER: admin
+        DB_PASSWORD: password
+      run: |
+        cat > create_schemas.sql << EOF
+        CREATE SCHEMA IF NOT EXISTS staging;
+        CREATE SCHEMA IF NOT EXISTS production;
+        CREATE SCHEMA IF NOT EXISTS warehouse;
+        EOF
+        psql -h localhost -U admin -d ecommercedb -f create_schemas.sql
+    
+    - name: Run tests with coverage
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: ecommercedb
+        DB_USER: admin
+        DB_PASSWORD: password
+      run: |
+        pytest tests/ -v --cov=scripts --cov-report=xml --cov-report=html \
+          --cov-report=term-missing || exit 1
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4

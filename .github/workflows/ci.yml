@@ -42,13 +42,13 @@ jobs:
         pip install flake8
         flake8 scripts/ --ignore=E501,E302,E305,W291,W293,E722,F401,F811,F541 || true
     
-    - name: Setup DB + FULL Tables ✅
+    - name: Setup DB + ALL Tables ✅
       env:
         PGPASSWORD: password
       run: |
         psql -h localhost -U admin -d ecommercedb -c "CREATE SCHEMA IF NOT EXISTS staging;" -c "CREATE SCHEMA IF NOT EXISTS production;" -c "CREATE SCHEMA IF NOT EXISTS warehouse;"
         psql -h localhost -U admin -d ecommercedb -c "
-          -- STAGING TABLES (for ingestion)
+          -- STAGING TABLES
           CREATE TABLE IF NOT EXISTS staging.customers (
             customerid TEXT PRIMARY KEY, firstname TEXT, lastname TEXT, email TEXT, phone BIGINT,
             registrationdate DATE, city TEXT, state TEXT, country TEXT, agegroup TEXT
@@ -65,7 +65,7 @@ jobs:
             unitprice NUMERIC, discountpercentage NUMERIC, linetotal NUMERIC
           );
           
-          -- PRODUCTION TABLES (for staging_to_production.py)
+          -- PRODUCTION TABLES
           CREATE TABLE IF NOT EXISTS production.customers (
             customerid TEXT PRIMARY KEY, firstname TEXT, lastname TEXT, email TEXT, 
             phone BIGINT, registrationdate DATE, city TEXT, state TEXT, country TEXT, agegroup TEXT
@@ -80,6 +80,31 @@ jobs:
           CREATE TABLE IF NOT EXISTS production.transactionitems (
             itemid TEXT PRIMARY KEY, transactionid TEXT, productid TEXT, quantity INTEGER,
             unitprice NUMERIC, discountpercentage NUMERIC, linetotal NUMERIC
+          );
+          
+          -- WAREHOUSE TABLES (for load_warehouse.py)
+          CREATE TABLE IF NOT EXISTS warehouse.factorders (
+            orderkey SERIAL PRIMARY KEY, customerkey INTEGER, datekey INTEGER, productkey INTEGER,
+            orderdatekey INTEGER, quantity INTEGER, unitprice NUMERIC, totalamount NUMERIC
+          );
+          CREATE TABLE IF NOT EXISTS warehouse.dimcustomers (
+            customerkey SERIAL PRIMARY KEY, customerid TEXT, firstname TEXT, lastname TEXT,
+            email TEXT, city TEXT, state TEXT, country TEXT, agegroup TEXT, iscurrent BOOLEAN
+          );
+          CREATE TABLE IF NOT EXISTS warehouse.dimorders (
+            orderkey SERIAL PRIMARY KEY, transactionid TEXT, orderdate DATE
+          );
+          CREATE TABLE IF NOT EXISTS warehouse.dimdate (
+            datekey SERIAL PRIMARY KEY, fulldate DATE, year INTEGER, month INTEGER, day INTEGER
+          );
+          CREATE TABLE IF NOT EXISTS warehouse.agg_daily_sales (
+            datekey INTEGER PRIMARY KEY, total_sales NUMERIC, total_orders INTEGER
+          );
+          CREATE TABLE IF NOT EXISTS warehouse.agg_product_performance (
+            productkey INTEGER PRIMARY KEY, total_revenue NUMERIC, total_quantity INTEGER
+          );
+          CREATE TABLE IF NOT EXISTS warehouse.agg_customer_metrics (
+            customerkey INTEGER PRIMARY KEY, total_spend NUMERIC, order_count INTEGER
           );
         "
         python scripts/pipeline/orchestrator.py

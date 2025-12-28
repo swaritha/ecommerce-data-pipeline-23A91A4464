@@ -45,13 +45,8 @@ jobs:
     - name: Setup DB + Seed Pipeline ✅
       env:
         PGPASSWORD: password
-        DB_HOST: localhost
-        DB_PORT: 5432
-        DB_NAME: ecommercedb
-        DB_USER: admin
-        DB_PASSWORD: password
       run: |
-        psql -h localhost -U admin -d ecommercedb -c "CREATE SCHEMA IF NOT EXISTS staging, production, warehouse;"
+        psql -h localhost -U admin -d ecommercedb -c "CREATE SCHEMA IF NOT EXISTS staging;" -c "CREATE SCHEMA IF NOT EXISTS production;" -c "CREATE SCHEMA IF NOT EXISTS warehouse;"
         python scripts/datageneration/generatedata.py
         python scripts/ingestion/ingest_to_staging.py
         python scripts/qualitychecks/validate_data.py

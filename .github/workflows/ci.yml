@@ -47,6 +47,17 @@ jobs:
         PGPASSWORD: password
       run: |
         psql -h localhost -U admin -d ecommercedb -c "CREATE SCHEMA IF NOT EXISTS staging;" -c "CREATE SCHEMA IF NOT EXISTS production;" -c "CREATE SCHEMA IF NOT EXISTS warehouse;"
+        psql -h localhost -U admin -d ecommercedb -c "
+          CREATE TABLE IF NOT EXISTS staging.customers (
+            customerid SERIAL PRIMARY KEY, customername TEXT, email TEXT, registration_date DATE
+          );
+          CREATE TABLE IF NOT EXISTS staging.products (
+            productid SERIAL PRIMARY KEY, productname TEXT, category TEXT, price DECIMAL
+          );
+          CREATE TABLE IF NOT EXISTS staging.orders (
+            orderid SERIAL PRIMARY KEY, customerid INTEGER, order_date DATE, total_amount DECIMAL
+          );
+        "
         python scripts/datageneration/generatedata.py
         python scripts/ingestion/ingest_to_staging.py
         python scripts/qualitychecks/validate_data.py

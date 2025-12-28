@@ -49,13 +49,38 @@ jobs:
         psql -h localhost -U admin -d ecommercedb -c "CREATE SCHEMA IF NOT EXISTS staging;" -c "CREATE SCHEMA IF NOT EXISTS production;" -c "CREATE SCHEMA IF NOT EXISTS warehouse;"
         psql -h localhost -U admin -d ecommercedb -c "
           CREATE TABLE IF NOT EXISTS staging.customers (
-            customerid SERIAL PRIMARY KEY, customername TEXT, email TEXT, registration_date DATE
+            customerid TEXT PRIMARY KEY,
+            firstname TEXT,
+            lastname TEXT,
+            email TEXT,
+            phone BIGINT,
+            registrationdate DATE,
+            city TEXT,
+            state TEXT,
+            country TEXT,
+            agegroup TEXT
           );
           CREATE TABLE IF NOT EXISTS staging.products (
-            productid SERIAL PRIMARY KEY, productname TEXT, category TEXT, price DECIMAL
+            productid TEXT PRIMARY KEY,
+            productname TEXT,
+            category TEXT,
+            price NUMERIC,
+            cost NUMERIC
           );
-          CREATE TABLE IF NOT EXISTS staging.orders (
-            orderid SERIAL PRIMARY KEY, customerid INTEGER, order_date DATE, total_amount DECIMAL
+          CREATE TABLE IF NOT EXISTS staging.transactions (
+            transactionid TEXT PRIMARY KEY,
+            customerid TEXT,
+            transactiondate DATE,
+            paymentmethod TEXT
+          );
+          CREATE TABLE IF NOT EXISTS staging.transactionitems (
+            itemid TEXT PRIMARY KEY,
+            transactionid TEXT,
+            productid TEXT,
+            quantity INTEGER,
+            unitprice NUMERIC,
+            discountpercentage NUMERIC,
+            linetotal NUMERIC
           );
         "
         python scripts/datageneration/generatedata.py

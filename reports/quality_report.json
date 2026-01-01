@@ -1,15 +1,15 @@
 {
-  "check_timestamp": "2025-12-27T05:34:06.652877",
+  "check_timestamp": "2026-01-01T22:37:51.361707",
   "checks_performed": {
     "null_checks": {
-      "status": "failed",
+      "status": "passed",
       "tables_checked": [
         "staging.customers",
         "staging.products",
         "staging.transactions",
         "staging.transactionitems"
       ],
-      "null_violations": 1,
+      "null_violations": 0,
       "details": {
         "staging.customers": {
           "customerid": 0,
@@ -20,7 +20,7 @@
         },
         "staging.products": {
           "productid": 0,
-          "productname": 1,
+          "productname": 0,
           "category": 0,
           "price": 0,
           "cost": 0
@@ -66,10 +66,7 @@
         "transactions_customer_orphans": 0,
         "items_transaction_orphans": 0,
         "items_product_orphans": 0,
-        "total_orphans": 0,
-        "fact_customers_orphans": 0,
-        "fact_orders_orphans": 0,
-        "fact_date_orphans": 0
+        "total_orphans": 0
       }
     },
     "range_checks": {
@@ -78,12 +75,10 @@
       "details": {
         "products_invalid_price_cost": 0,
         "transactionitems_invalid_ranges": 0,
-        "negative_quantity": 0,
-        "negative_price": 0,
-        "total_mismatch": 0
+        "negative_quantity": 0
       }
     }
   },
-  "overall_quality_score": 99.5,
+  "overall_quality_score": 100.0,
   "quality_grade": "A"
 }
